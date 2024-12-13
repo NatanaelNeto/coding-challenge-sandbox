@@ -1,3 +1,6 @@
 :root {
   --background_color: #eaebef;
+  --text_color: #33363a;
+  --background_invert_color: #33363a;
+  --text_invert_color: #eaebef;
 }
