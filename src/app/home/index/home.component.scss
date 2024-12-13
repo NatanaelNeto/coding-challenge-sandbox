@@ -1,0 +1,7 @@
+.home {
+  max-width: 50%;
+  &-title {
+    border-bottom: 5px solid var(--text_color);
+    margin-bottom: 20px;
+  }
+}
