@@ -17,7 +17,7 @@ html, body {
   color: var(--text_color);
 
   font-family: 'Roboto Mono', 'Roboto', sans-serif;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 h1, h2, h3, h4 {
@@ -92,4 +92,11 @@ h4 { font-size: 16px; }
       }
     }
   }
+}
+
+// CONTAINER
+
+.container {
+  padding: 40px;
+  width: 100%;
 }
