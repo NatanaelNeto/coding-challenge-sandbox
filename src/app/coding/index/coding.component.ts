@@ -7,6 +7,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CodingComponent implements OnInit {
 
+  links = [
+    { path: 'game-of-life', title: "Conway's Game of Life", brief: "A case study of the famous Conway's Game of Life, featuring interactive elements" },
+  ];
+
   constructor() { }
 
   ngOnInit() {

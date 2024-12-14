@@ -1,0 +1,14 @@
+.coding-list {
+  list-style: none;
+  
+  &-item {
+    display: flex;
+    padding: 20px;
+    flex-flow: column;
+
+    &:hover {
+      background-color: var(--background_invert_color);
+      color: var(--text_invert_color);
+    }
+  }
+}

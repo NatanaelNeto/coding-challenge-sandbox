@@ -1,3 +1,26 @@
-<p>
-  coding works!
-</p>
+<section class="section">
+  <div class="section-container">
+    <div class="section-title">
+      <h2>CODING</h2>
+    </div>
+    <div class="section-content">
+      <p>This is my coding showcase list. Each link includes the current code and a brief description. Feel free to
+        view, copy, and test the code!</p>
+    </div>
+  </div>
+  <div class="section-container">
+    <div class="section-title no-margin-bottom">
+      <h2>CODES</h2>
+    </div>
+    <div class="section-content">
+      <ul class="coding-list">
+        <li *ngFor="let link of links" class="coding-list-item" routerLink="{{ link.path }}">
+          <div class="coding-list-item-group">
+            <h3>{{ link.title }}</h3>
+            <p>{{ link.brief }}</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
