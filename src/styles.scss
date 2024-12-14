@@ -1,1 +1,194 @@
 /* You can add global styles to this file, and also import other style files */
+
+// IMPORTS
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100vh;
+  width: 100%;
+
+  background-color: var(--background_color);
+  color: var(--text_color);
+
+  font-family: 'Roboto Mono', 'Roboto', sans-serif;
+  font-size: 16px;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Roboto Condensed', 'Roboto', sans-serif;
+}
+
+h1 { font-size: 40px; }
+h2 { font-size: 32px; }
+h3 { font-size: 24px; }
+h4 { font-size: 16px; }
+
+// HEADER
+
+.header {
+  padding: 20px 30px;
+  display: flex;
+  flex-flow: column;
+  width: 100%;
+
+  &-title {
+    width: 100%;
+    padding-bottom: 20px;
+    border-bottom: 10px solid var(--text_color);
+  }
+
+  &-nav {
+    display: flex;
+    width: 100%;
+    ul {
+      display: flex;
+      width: 100%;
+
+      list-style: none;
+
+      li {
+        text-transform: uppercase;
+        padding: 10px 20px;
+        background-color: var(--background_color);
+        color: var(--text_color);
+        font-size: 16px;
+
+        &:hover {
+          background-color: var(--background_invert_color);
+          color: var(--text_invert_color);
+        }
+
+        &.active {
+          position: relative;
+
+          &::after {
+            position: absolute;
+            height: 10px;
+            width: 10px;
+            content: '';
+            background-color: var(--text_color);
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 0);
+          }
+
+          &:hover::after {
+            position: absolute;
+            height: 10px;
+            width: 10px;
+            content: '';
+            background-color: var(--text_invert_color);
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 0);
+          }
+        }
+      }
+    }
+  }
+}
+
+// CONTAINER
+
+.container {
+  padding: 20px 30px;
+  width: 100%;
+}
+
+.section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+
+  &-title {
+    border-bottom: 5px solid var(--text_color);
+    margin-bottom: 20px;
+  }
+
+  &-content {
+    p {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+// LAYOUT FIXES
+.no-margin-bottom {
+  margin-bottom: 0;
+}
+
+// GRID SYSTEM
+
+.grid-system {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 10px 5px;
+
+  .gs-1 { grid-column-start: span 1; }
+  .gs-2 { grid-column-start: span 2; }
+  .gs-3 { grid-column-start: span 3; }
+  .gs-4 { grid-column-start: span 4; }
+  .gs-5 { grid-column-start: span 5; }
+  .gs-6 { grid-column-start: span 6; }
+  .gs-7 { grid-column-start: span 7; }
+  .gs-8 { grid-column-start: span 8; }
+  .gs-9 { grid-column-start: span 9; }
+  .gs-10 { grid-column-start: span 10; }
+  .gs-11 { grid-column-start: span 11; }
+  .gs-12 { grid-column-start: span 12; }
+}
+
+// INPUTS
+
+.input-group {
+  width: 100%;
+  display: flex;
+  flex-flow: column;
+
+  label {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    border: 2px solid var(--text_color);
+    color: var(--text_color);
+    padding: 10px;
+    background-color: var(--background_color);
+  }
+
+  button {
+    height: 100%;
+    width: 100%;
+    border: none;
+    background-color: var(--text_color);
+    color: var(--background_color);
+    font-size: 24px;
+    text-transform: uppercase;
+    font-family: 'Roboto Mono', 'Roboto', sans-serif;
+  }
+}
+
+// CANVAS
+.canvas {
+  display: flex;
+  width: 100%;
+  margin-top: 20px;
+  align-items: center;
+  justify-content: center;
+
+  canvas {
+    background-color: white;
+    padding: var(--padding);
+    border: 2px solid var(--text_color);
+  }
+}
