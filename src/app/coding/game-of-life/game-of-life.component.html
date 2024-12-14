@@ -1,1 +1,37 @@
-<p>game-of-life works!</p>,
+<section class="section">
+  <div class="section-container">
+    <div class="section-title">
+      <h2>Conway's Game of Life</h2>
+    </div>
+    <div class="section-content">
+      <p>Conway's Game of Life is a famous cellular automaton created by John Conway. It's a grid-based simulation where cells live, die, or reproduce based on simple rules. Despite its simplicity, it produces fascinating patterns and behaviors, making it a great study in complexity and emergent systems. This project explores the game's mechanics and adds interactive features for experimentation.</p>
+      <p>In this code, you can change the number of cells and the initial generation.</p>
+    </div>
+  </div>
+  <div class="section-container">
+    <div class="grid-system">
+      <div class="gs-4 input-group">
+        <label for="">Size of pixels (px)</label>
+        <input [disabled]="onIteration" type="number" min="1" [(ngModel)]="cellSize" (change)="resetArray(); drawGrid()">
+      </div>
+      <div class="gs-4 input-group">
+        <label for="">Size of square</label>
+        <input [disabled]="onIteration" type="number" min="1" [(ngModel)]="squareSize" (change)="resetArray(); drawGrid()">
+      </div>
+      <div class="gs-4 input-group">
+        <label for="">Size of spacing</label>
+        <input [disabled]="onIteration" type="number" min="1" [(ngModel)]="arraySpacing" (change)="drawGrid()">
+      </div>
+      <div class="gs-4 input-group">
+        <label for="">Generation duration (ms)</label>
+        <input [disabled]="onIteration" type="number" min="100" step="100" [(ngModel)]="genDur">
+      </div>
+      <div class="gs-4 input-group">
+        <button (click)="toggleIteration()">{{ onIteration ? 'STOP' : 'Start'}}</button>
+      </div>
+    </div>
+    <div class="canvas" [style]="'--padding: {{arraySpacing }}px'">
+      <canvas #myCanvas></canvas>
+    </div>
+  </div>
+</section>
