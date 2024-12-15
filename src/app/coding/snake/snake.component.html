@@ -1,0 +1,32 @@
+<section class="section">
+  <div class="section-container">
+    <div class="section-title">
+      <h2>Snake Game</h2>
+    </div>
+    <div class="section-content">
+      <p>The Snake Game, one of the most classic coding challenges, was created in the 1970s. You control a snake that chases and eats an apple, which appears at different points on the grid. If you hit a wall or yourself, you lose. If there’s no space left to place a new apple, you win.</p>
+      <p>Here, you can select the game difficulty and choose whether to include walls around the grid. Thank you for playing!</p>
+    </div>
+  </div>
+  <div class="section-container">
+    <div class="grid-system">
+      <div class="gs-4 input-group">
+        <label for="">Size of square</label>
+        <input [disabled]="onGame" type="number" min="10" [(ngModel)]="squareSize" (change)="drawGrid()">
+      </div>
+      <div class="gs-4 input-group">
+        <label for="">Frame Update (ms)</label>
+        <input [disabled]="onGame" type="number" min="100" max="500" step="10" [(ngModel)]="frameUpdate">
+      </div>
+      <div class="gs-4 input-group">
+        <button class="toggle {{ haveWalls ? 'active' : ''}}" (click)="toggleWalls()">{{ haveWalls ? 'Walls On' : 'Walls Off'}}</button>
+      </div>
+      <div class="gs-4 input-group">
+        <button (click)="toggleIteration()">{{ onGame ? 'Stop' : 'Start'}}</button>
+      </div>
+    </div>
+    <div class="canvas {{ haveWalls ? 'large-border' : ''}}" [style]="'--padding: {{arraySpacing }}px'">
+      <canvas #myCanvas class="{{ haveWalls ? 'large-border' : ''}}"></canvas>
+    </div>
+  </div>
+</section>
