@@ -14,8 +14,10 @@ export class SnakeComponent implements OnInit {
   frameUpdate = 200;
 
   allowMove: boolean = true;
+  allowCreateApple: boolean = true;
 
   public snake: Snake = new Snake();
+  public apple: BodyPosition | null = null;
 
   onGame = false;
   haveWalls = false;
@@ -23,6 +25,7 @@ export class SnakeComponent implements OnInit {
 
   black = "#3a3c3f";
   white = "#e0e3e6";
+  red = '#f44336';
 
   currGrid: boolean[][] = [];
   nextGrid: boolean[][] = [];
@@ -52,6 +55,9 @@ export class SnakeComponent implements OnInit {
   }
 
   drawGrid(): void {
+    if(this.onGame && this.allowCreateApple) {
+      this.createApple();
+    }
     const canvasEl = this.canvas.nativeElement;
 
     canvasEl.style.setProperty('--padding', `${this.arraySpacing}px`);
@@ -69,8 +75,13 @@ export class SnakeComponent implements OnInit {
 
         // Desenhar o snake
         const isSnakePart = this.snake.body.some(part => part.row === row && part.col === col);
+        let isApplePart = false;
 
-        this.ctx.fillStyle = isSnakePart ? this.black : this.white;
+        if(this.apple) {
+          isApplePart = this.apple.row == row && this.apple.col == col;
+        }
+
+        this.ctx.fillStyle = isSnakePart ? this.black : isApplePart ? this.red : this.white;
         this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
       }
     }
@@ -120,6 +131,7 @@ export class SnakeComponent implements OnInit {
 
     if ((this.haveWalls && (dir.col >= this.squareSize || dir.col < 0 || dir.row >= this.squareSize || dir.row < 0)) || this.snake.body.some(part => part.row === dir.row && part.col === dir.col)) {
       this.toggleIteration();
+      // TODO: Fazer cálculo de fim de jogo e reinício
     }
 
     else if (dir.col >= this.squareSize) {
@@ -169,55 +181,15 @@ export class SnakeComponent implements OnInit {
     }
   }
 
-
-  checkIsAlive(row: number, col: number, currState: boolean): boolean {
-    const topRow = row - 1;
-    const downRow = row + 1;
-    const leftCol = col - 1;
-    const rightCol = col + 1;
-
-    const neighbors: boolean[] = []
-
-    // VERIFY TOP NEIGHBORS
-    if (topRow >= 0) {
-      neighbors.push(this.currGrid[topRow][col]);
-
-      if (leftCol >= 0) {
-        neighbors.push(this.currGrid[topRow][leftCol]);
-      }
-
-      if (rightCol < this.squareSize) {
-        neighbors.push(this.currGrid[topRow][rightCol]);
-      }
+  createApple() {
+    this.allowCreateApple = false;
+    this.apple = new BodyPosition();
+    this.apple.col = Math.floor(Math.random() * this.squareSize);
+    this.apple.row = Math.floor(Math.random() * this.squareSize);
+    
+    while(this.snake.body.some(part => part.row === this.apple!.row && part.col === this.apple!.col)) {
+      this.apple.col = Math.floor(Math.random() * this.squareSize);
+      this.apple.row = Math.floor(Math.random() * this.squareSize);
     }
-
-
-    // VERIFY LEFT NEIGHBOR
-    if (leftCol >= 0) {
-      neighbors.push(this.currGrid[row][leftCol]);
-    }
-
-
-    // VERIFY DOWN NEIGHBORS
-    if (downRow < this.squareSize) {
-      neighbors.push(this.currGrid[downRow][col]);
-
-      if (leftCol >= 0) {
-        neighbors.push(this.currGrid[downRow][leftCol]);
-      }
-
-      if (rightCol < this.squareSize) {
-        neighbors.push(this.currGrid[downRow][rightCol]);
-      }
-    }
-
-    // VERIFY RIGHT NEIGHBOR
-    if (rightCol < this.squareSize) {
-      neighbors.push(this.currGrid[row][rightCol]);
-    }
-
-    const count = neighbors.reduce((c, v) => c + (v ? 1 : 0), 0);
-
-    return (count < 2 || count > 3) ? false : count == 3 ? true : currState;
   }
 }
