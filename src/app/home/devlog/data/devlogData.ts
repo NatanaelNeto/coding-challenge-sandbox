@@ -25,4 +25,17 @@ export const devlogData: devlogViewModel[] = [
       "I'll also improve this site by adding a mobile-friendly version and a dark mode design.",
     ]
   },
+  {
+    id: 3,
+    title: "Snake Game",
+    date: new Date('14/12/2024'),
+    paragraphs: [
+      "Hello, devs!",
+      "I completed my tasks at work, but I stayed in the office to help with any issues that might arise. Because of this, I decided to create another classic project: The Snake Game.",
+      "In this project, I didn’t encounter any difficulties. I built the game logic step by step and finished on time! First, I set up the game grid using the same inputs as the Conway's Game of Life project.",
+      "Next, I worked on the snake's movements, creating directional controls and implementing collision avoidance. I also added a toggle for walls and a collision detection system.",
+      "Finally, I created the apple. I did wonder whether real snakes eat apples, but I placed it randomly on the grid and implemented a collision detection system with the snake. Each apple the snake eats awards a point to the player. The score is saved in the browser's local storage, allowing the player to see their highest score on the page.",
+      "I hope you enjoy the game!",
+    ]
+  },
 ];
