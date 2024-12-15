@@ -11,7 +11,7 @@ export class SnakeComponent implements OnInit {
   squareSize = 20;
   arraySpacing = 2;
 
-  frameUpdate = 200;
+  frameUpdate = 100;
 
   allowMove: boolean = true;
   allowCreateApple: boolean = true;
@@ -153,6 +153,12 @@ export class SnakeComponent implements OnInit {
       this.snake.body.pop();
       dir.row = this.squareSize - 1;
       this.snake.body.unshift(dir);
+    }
+    else if(this.apple && dir.row == this.apple.row && dir.col == this.apple.col) {
+      this.apple = null;
+      this.snake.size += 1;
+      this.snake.body.unshift(dir);
+      this.allowCreateApple = true;
     }
     else {
       this.snake.body.pop();
