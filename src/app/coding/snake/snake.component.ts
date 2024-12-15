@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild, type OnInit } from '@angular/core';
-import { Snake } from 'src/app/shared/models/snake-view-model';
+import { BodyPosition, Direction, Snake } from 'src/app/shared/models/snake-view-model';
 
 @Component({
   selector: 'app-snake',
@@ -12,6 +12,8 @@ export class SnakeComponent implements OnInit {
   arraySpacing = 2;
 
   frameUpdate = 200;
+
+  allowMove: boolean = true;
 
   public snake: Snake = new Snake();
 
@@ -31,7 +33,7 @@ export class SnakeComponent implements OnInit {
 
   ngOnInit(): void {
     this.snake.size = 4;
-    this.snake.body.push({row: 0, col: 0}, {row: 0, col: 1}, {row: 0, col: 2}, {row: 0, col: 3});
+    this.snake.body.push({ row: 0, col: 3 }, { row: 0, col: 2 }, { row: 0, col: 1 }, { row: 0, col: 0 },);
 
     console.log(this.snake)
   }
@@ -39,6 +41,9 @@ export class SnakeComponent implements OnInit {
   ngAfterViewInit(): void {
     this.resetArray();
     this.drawGrid();
+
+    // const canvasEl = this.canvas.nativeElement;
+    window.addEventListener('keydown', this.onKeyboardDown.bind(this));
   }
 
   resetArray() {
@@ -62,9 +67,33 @@ export class SnakeComponent implements OnInit {
         const x = col * (this.cellSize + this.arraySpacing);
         const y = row * (this.cellSize + this.arraySpacing);
 
-        // Desenhar cada quadrado
-        this.ctx.fillStyle = this.currGrid[row][col] ? this.black : this.white;
+        // Desenhar o snake
+        const isSnakePart = this.snake.body.some(part => part.row === row && part.col === col);
+
+        this.ctx.fillStyle = isSnakePart ? this.black : this.white;
         this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
+      }
+    }
+
+    this.allowMove = true;
+  }
+
+  onKeyboardDown(event: any) {
+    if (this.allowMove) {
+      this.allowMove = false;
+      switch (event.key) {
+        case 'ArrowUp':
+          if (this.snake.dir != Direction.Down) this.snake.dir = Direction.Up;
+          break;
+        case 'ArrowDown':
+          if (this.snake.dir != Direction.Up) this.snake.dir = Direction.Down;
+          break;
+        case 'ArrowLeft':
+          if (this.snake.dir != Direction.Right) this.snake.dir = Direction.Left;
+          break;
+        case 'ArrowRight':
+          if (this.snake.dir != Direction.Left) this.snake.dir = Direction.Right;
+          break;
       }
     }
   }
@@ -75,27 +104,71 @@ export class SnakeComponent implements OnInit {
 
   toggleIteration() {
     this.onGame = !this.onGame;
-    
+
     if (this.onGame) {
       this.interval = window.setInterval(this.getNextGen.bind(this), this.frameUpdate);
     }
-    
+
     else if (this.interval) {
       clearInterval(this.interval);
       this.interval = undefined;
     }
   }
-  
+
   getNextGen() {
-    for (let row = 0; row < this.squareSize; row += 1) {
-      for (let col = 0; col < this.squareSize; col += 1) {
-        this.nextGrid[row][col] = this.checkIsAlive(row, col, this.currGrid[row][col]);
-      }
+    const dir: BodyPosition = this.getBodyPosition();
+
+    if ((this.haveWalls && (dir.col >= this.squareSize || dir.col < 0 || dir.row >= this.squareSize || dir.row < 0)) || this.snake.body.some(part => part.row === dir.row && part.col === dir.col)) {
+      this.toggleIteration();
     }
-    
-    this.currGrid = this.nextGrid.map(row => [...row]);
+
+    else if (dir.col >= this.squareSize) {
+      this.snake.body.pop();
+      dir.col = 0;
+      this.snake.body.unshift(dir);
+    }
+    else if (dir.col < 0) {
+      this.snake.body.pop();
+      dir.col = this.squareSize - 1;
+      this.snake.body.unshift(dir);
+    }
+    else if (dir.row >= this.squareSize) {
+      this.snake.body.pop();
+      dir.row = 0;
+      this.snake.body.unshift(dir);
+    }
+    else if (dir.row < 0) {
+      this.snake.body.pop();
+      dir.row = this.squareSize - 1;
+      this.snake.body.unshift(dir);
+    }
+    else {
+      this.snake.body.pop();
+      this.snake.body.unshift(dir);
+    }
+    // for (let row = 0; row < this.squareSize; row += 1) {
+    //   for (let col = 0; col < this.squareSize; col += 1) {
+    //     this.nextGrid[row][col] = this.checkIsAlive(row, col, this.currGrid[row][col]);
+    //   }
+    // }
+
+    // this.currGrid = this.nextGrid.map(row => [...row]);
     this.drawGrid();
   }
+
+  getBodyPosition(): BodyPosition {
+    switch (this.snake.dir) {
+      case Direction.Down:
+        return { row: this.snake.body[0].row + 1, col: this.snake.body[0].col }
+      case Direction.Up:
+        return { row: this.snake.body[0].row - 1, col: this.snake.body[0].col }
+      case Direction.Left:
+        return { row: this.snake.body[0].row, col: this.snake.body[0].col - 1 }
+      case Direction.Right:
+        return { row: this.snake.body[0].row, col: this.snake.body[0].col + 1 }
+    }
+  }
+
 
   checkIsAlive(row: number, col: number, currState: boolean): boolean {
     const topRow = row - 1;

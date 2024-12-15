@@ -4,7 +4,7 @@ export class Snake {
   dir: Direction = Direction.Right;
 }
 
-class BodyPosition {
+export class BodyPosition {
   row: number;
   col: number;
 }
