@@ -44,6 +44,10 @@ h4 {
   font-size: 16px;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 // HEADER
 
 .header {
@@ -246,6 +250,7 @@ h4 {
 // CANVAS
 .canvas {
   display: flex;
+  flex-flow: column;
   width: 100%;
   margin-top: 20px;
   align-items: center;
@@ -259,5 +264,9 @@ h4 {
     &.large-border {
       border-width: 8px;
     }
+  }
+
+  p.game-info {
+    margin-top: 10px;
   }
 }

@@ -6,6 +6,7 @@
     <div class="section-content">
       <p>The Snake Game, one of the most classic coding challenges, was created in the 1970s. You control a snake that chases and eats an apple, which appears at different points on the grid. If you hit a wall or yourself, you lose. If there’s no space left to place a new apple, you win.</p>
       <p>Here, you can select the game difficulty and choose whether to include walls around the grid. Thank you for playing!</p>
+      <p>Now, your max score in this game is <span class="bold">{{ maxScore }} points</span>. This value is storaged on your browser.</p>
     </div>
   </div>
   <div class="section-container">
@@ -27,6 +28,7 @@
     </div>
     <div class="canvas {{ haveWalls ? 'large-border' : ''}}" [style]="'--padding: {{arraySpacing }}px'">
       <canvas #myCanvas class="{{ haveWalls ? 'large-border' : ''}}"></canvas>
+      <p class="game-info">Current score: {{ snake.size }} points</p>
     </div>
   </div>
 </section>

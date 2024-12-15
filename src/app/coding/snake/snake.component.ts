@@ -28,17 +28,16 @@ export class SnakeComponent implements OnInit {
   red = '#f44336';
 
   currGrid: boolean[][] = [];
-  nextGrid: boolean[][] = [];
+
+  maxScore: number = 0;
 
   @ViewChild('myCanvas', { static: false }) canvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
 
 
   ngOnInit(): void {
-    this.snake.size = 4;
-    this.snake.body.push({ row: 0, col: 3 }, { row: 0, col: 2 }, { row: 0, col: 1 }, { row: 0, col: 0 },);
-
-    console.log(this.snake)
+    this.resetSnake();
+    this.maxScore = Number(window.localStorage.getItem('snakeScore') || 0);
   }
 
   ngAfterViewInit(): void {
@@ -51,7 +50,6 @@ export class SnakeComponent implements OnInit {
 
   resetArray() {
     this.currGrid = Array.from({ length: this.squareSize }, () => Array(this.squareSize).fill(false));
-    this.nextGrid = Array.from({ length: this.squareSize }, () => Array(this.squareSize).fill(false));
   }
 
   drawGrid(): void {
@@ -73,7 +71,6 @@ export class SnakeComponent implements OnInit {
         const x = col * (this.cellSize + this.arraySpacing);
         const y = row * (this.cellSize + this.arraySpacing);
 
-        // Desenhar o snake
         const isSnakePart = this.snake.body.some(part => part.row === row && part.col === col);
         let isApplePart = false;
 
@@ -131,7 +128,7 @@ export class SnakeComponent implements OnInit {
 
     if ((this.haveWalls && (dir.col >= this.squareSize || dir.col < 0 || dir.row >= this.squareSize || dir.row < 0)) || this.snake.body.some(part => part.row === dir.row && part.col === dir.col)) {
       this.toggleIteration();
-      // TODO: Fazer cálculo de fim de jogo e reinício
+      this.setEndGame();
     }
 
     else if (dir.col >= this.squareSize) {
@@ -164,13 +161,7 @@ export class SnakeComponent implements OnInit {
       this.snake.body.pop();
       this.snake.body.unshift(dir);
     }
-    // for (let row = 0; row < this.squareSize; row += 1) {
-    //   for (let col = 0; col < this.squareSize; col += 1) {
-    //     this.nextGrid[row][col] = this.checkIsAlive(row, col, this.currGrid[row][col]);
-    //   }
-    // }
 
-    // this.currGrid = this.nextGrid.map(row => [...row]);
     this.drawGrid();
   }
 
@@ -197,5 +188,19 @@ export class SnakeComponent implements OnInit {
       this.apple.col = Math.floor(Math.random() * this.squareSize);
       this.apple.row = Math.floor(Math.random() * this.squareSize);
     }
+  }
+
+  setEndGame() {
+    if (this.maxScore < this.snake.size) {
+      window.localStorage.setItem('snakeScore', this.snake.size.toString());
+      this.maxScore = this.snake.size;
+    }
+    this.resetSnake();
+  };
+
+  resetSnake() {
+    this.snake.size = 4;
+    this.snake.body = [];
+    this.snake.body.push({ row: 0, col: 3 }, { row: 0, col: 2 }, { row: 0, col: 1 }, { row: 0, col: 0 });
   }
 }
