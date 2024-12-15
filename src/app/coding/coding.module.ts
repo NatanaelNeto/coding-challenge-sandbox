@@ -5,6 +5,7 @@ import { CodingRoutingModule } from './coding-routing.module';
 import { GameOfLifeComponent } from './game-of-life/game-of-life.component';
 import { FormsModule } from '@angular/forms';
 import { SnakeComponent } from './snake/snake.component';
+import { AStarComponent } from './a-star/a-star.component';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { SnakeComponent } from './snake/snake.component';
   declarations: [
     CodingComponent,
     GameOfLifeComponent,
-    SnakeComponent
+    SnakeComponent,
+    AStarComponent
   ],
 })
 export class CodingModule { }
