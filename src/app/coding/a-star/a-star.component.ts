@@ -1,4 +1,5 @@
 import { Component, ElementRef, ViewChild, type OnInit } from '@angular/core';
+import { ASNode } from 'src/app/shared/models/a-star-view-model';
 
 @Component({
   selector: 'app-a-star',
@@ -17,6 +18,15 @@ export class AStarComponent implements OnInit {
 
   black = "#3a3c3f";
   white = "#e0e3e6";
+
+  toAddOrigin: boolean = false;
+  toAddTarget: boolean = false;
+  toAddWalls:  boolean = false;
+
+  map: ASNode[][] = [];
+
+  visited: ASNode[] = [];
+  toOpen: ASNode[] = [];
 
   currGrid: boolean[][] = [];
   nextGrid: boolean[][] = [];
@@ -38,9 +48,18 @@ export class AStarComponent implements OnInit {
   }
 
   resetArray() {
-    this.currGrid = Array.from({ length: this.squareSize }, () => Array(this.squareSize).fill(false));
-    this.nextGrid = Array.from({ length: this.squareSize }, () => Array(this.squareSize).fill(false));
+    this.map = Array.from({ length: this.squareSize }, () => Array(this.squareSize).fill({
+      parent: null,
+      distance: null,
+      isPath: true,
+      isVisited: false,
+      isOrigin: false,
+      isTarget: false,
+      targetCost: -1,
+      originCost: -1,
+    }));
   }
+
 
   drawGrid(): void {
     const canvasEl = this.canvas.nativeElement;
@@ -59,13 +78,17 @@ export class AStarComponent implements OnInit {
         const y = row * (this.cellSize + this.arraySpacing);
 
         // Desenhar cada quadrado
-        this.ctx.fillStyle = this.currGrid[row][col] ? this.black : this.white;
+        this.ctx.fillStyle = this.map[row][col].isPath ? this.white : this.black;
         this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
       }
     }
   }
 
   private onCanvasClick(event: MouseEvent): void {
+    if(!this.isItOnEdit()) {
+      return
+    }
+
     const canvasEl = this.canvas.nativeElement;
     const rect = canvasEl.getBoundingClientRect();
 
@@ -88,24 +111,24 @@ export class AStarComponent implements OnInit {
 
   toggleIteration() {
     this.onIteration = !this.onIteration;
-    
+
     if (this.onIteration) {
       this.interval = window.setInterval(this.getNextGen.bind(this), this.genDur);
     }
-    
+
     else if (this.interval) {
       clearInterval(this.interval);
       this.interval = undefined;
     }
   }
-  
+
   getNextGen() {
     for (let row = 0; row < this.squareSize; row += 1) {
       for (let col = 0; col < this.squareSize; col += 1) {
         this.nextGrid[row][col] = this.checkIsAlive(row, col, this.currGrid[row][col]);
       }
     }
-    
+
     this.currGrid = this.nextGrid.map(row => [...row]);
     this.drawGrid();
   }
@@ -159,5 +182,9 @@ export class AStarComponent implements OnInit {
     const count = neighbors.reduce((c, v) => c + (v ? 1 : 0), 0);
 
     return (count < 2 || count > 3) ? false : count == 3 ? true : currState;
+  }
+
+  isItOnEdit() {
+    return this.toAddOrigin || this.toAddTarget || this.toAddWalls;
   }
 }
