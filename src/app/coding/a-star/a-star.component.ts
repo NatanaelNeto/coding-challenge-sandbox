@@ -10,6 +10,7 @@ export class AStarComponent implements OnInit {
   cellSize = 15;
   squareSize = 20;
   arraySpacing = 2;
+  density = 0.25;
 
   genDur = 100;
 
@@ -160,6 +161,14 @@ export class AStarComponent implements OnInit {
         this.toOpen.push(origin);
         this.track = [];
         this.visited = [];
+
+        this.map.forEach(row => {
+          row.forEach(n => {
+            if(n.nodeType != ASNodeType.origin && n.nodeType != ASNodeType.target && n.nodeType != ASNodeType.wall) {
+              n.nodeType = ASNodeType.path;
+            }
+          })
+        })
       }
       this.interval = window.setInterval(this.getNextGen.bind(this), this.genDur);
     }
@@ -183,8 +192,6 @@ export class AStarComponent implements OnInit {
           this.map[currentNode.row][currentNode.col].nodeType = ASNodeType.visited;
         }
         this.visited.push(currentNode);
-
-        this.iteration += 1;
         
         if (currentNode.nodeType == ASNodeType.target) {
           this.toOpen = [];
@@ -198,6 +205,8 @@ export class AStarComponent implements OnInit {
               clearInterval(this.interval);
               this.interval = undefined;
               this.onIteration = false;
+              this.toOpen = [];
+              this.visited = [];
               return;
             }
             if(currNode.nodeType != ASNodeType.target) {
@@ -238,26 +247,41 @@ export class AStarComponent implements OnInit {
         }
 
         neighbors.forEach(n => {
-          if (n.nodeType == ASNodeType.wall || this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row)) {
+          if (n.nodeType == ASNodeType.wall || n.nodeType == ASNodeType.visited) { //this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row
             return;
-          } else if (n.nodeType == ASNodeType.visited) {
-            currentNode.parent = currentNode.parent?.distance! > n.distance! ? currentNode.parent : n;
-            return;
+          // } else if (n.nodeType == ASNodeType.visited) {
+          //   currentNode.parent = currentNode.parent?.distance! > n.distance! ? currentNode.parent : n;
+          //   return;
           }
-          n.parent = currentNode;
-          n.originCost = n.parent.originCost + this.getDist(n.row, n.col, n.parent.row, n.parent.col);
-          n.targetCost = this.getDist(n.row, n.col, this.targetLocation.row, this.targetLocation.col);
-          n.distance = n.originCost + n.targetCost;
-          this.toOpen.push(n);
+
+          let toOriginCost = currentNode.originCost + this.getDist(n.row, n.col, currentNode.row, currentNode.col);
+          let findOriginBest = false;
+
+          if(!this.toOpen.some(neightbor => neightbor.row == n.row && neightbor.col == n.col)) {
+            n.targetCost = this.getDist(n.row, n.col, this.targetLocation.row, this.targetLocation.col);
+            findOriginBest = true;
+            this.toOpen.push(n);
+          } else if (toOriginCost < n.originCost) {
+            findOriginBest = true;
+          }
+
+          if(findOriginBest) {
+            n.parent = currentNode;
+            n.originCost = toOriginCost;
+            n.distance = n.originCost + n.targetCost;
+          }
+          
+          
         });
 
-        this.toOpen.sort((a, b) => a.targetCost! - b.targetCost!);
+        this.toOpen.sort((a, b) => a.distance! - b.distance!);
       }
     }
 
     else {
       // EXIT PROGRAM
       this.toOpen = [];
+      this.visited = [];
       clearInterval(this.interval);
       this.interval = undefined;
       this.onIteration = false;
@@ -270,5 +294,37 @@ export class AStarComponent implements OnInit {
     const a = (tx - sx);
     const b = (ty - sy);
     return Math.sqrt(a*a + b*b);
+  }
+
+  setRandom() {
+    for (let row = 0; row < this.squareSize; row += 1) {
+      for (let col = 0; col < this.squareSize; col += 1) {
+        this.map[row][col].nodeType = Math.random() <= this.density ? ASNodeType.wall : ASNodeType.path;
+      }
+    }
+
+    let x = Math.floor(Math.random() * this.squareSize);
+    let y = Math.floor(Math.random() * this.squareSize);
+    this.map[x][y].nodeType = ASNodeType.origin;
+
+    let a = Math.floor(Math.random() * this.squareSize);
+    let b = Math.floor(Math.random() * this.squareSize);
+    
+    while (a == x) a = Math.floor(Math.random() * this.squareSize);
+    while (b == y) a = Math.floor(Math.random() * this.squareSize);
+    this.map[a][b].nodeType = ASNodeType.target;
+   
+    
+    this.targetLocation = {
+      row: a,
+      col: b,
+    }
+    
+    this.originLocation = {
+      row: x,
+      col: y,
+    }
+
+    this.drawGrid();
   }
 }
