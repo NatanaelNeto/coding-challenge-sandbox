@@ -220,17 +220,17 @@ export class AStarComponent implements OnInit {
         }
 
         if (currentNode.col - 1 >= 0) {
-          if (currentNode.row - 1 >= 0) {
+          if (currentNode.row - 1 >= 0 && !(this.map[currentNode.row][currentNode.col - 1].nodeType == ASNodeType.wall && this.map[currentNode.row - 1][currentNode.col].nodeType == ASNodeType.wall)) {
             neighbors.push(this.map[currentNode.row - 1][currentNode.col - 1]);
           }
-          if (currentNode.row + 1 < this.squareSize) {
+          if (currentNode.row + 1 < this.squareSize && !(this.map[currentNode.row][currentNode.col - 1].nodeType == ASNodeType.wall && this.map[currentNode.row + 1][currentNode.col].nodeType == ASNodeType.wall)) {
             neighbors.push(this.map[currentNode.row + 1][currentNode.col - 1]);
           }
           neighbors.push(this.map[currentNode.row][currentNode.col - 1]);
         }
 
         if (currentNode.col + 1 < this.squareSize) {
-          if (currentNode.row - 1 >= 0) {
+          if (currentNode.row - 1 >= 0 && !(this.map[currentNode.row][currentNode.col + 1].nodeType == ASNodeType.wall && this.map[currentNode.row - 1][currentNode.col].nodeType == ASNodeType.wall)) {
             neighbors.push(this.map[currentNode.row - 1][currentNode.col + 1]);
           }
           if (currentNode.row + 1 < this.squareSize) {
@@ -239,7 +239,7 @@ export class AStarComponent implements OnInit {
           neighbors.push(this.map[currentNode.row][currentNode.col + 1]);
         }
 
-        if (currentNode.row + 1 < this.squareSize) {
+        if (currentNode.row + 1 < this.squareSize && !(this.map[currentNode.row][currentNode.col + 1].nodeType == ASNodeType.wall && this.map[currentNode.row + 1][currentNode.col].nodeType == ASNodeType.wall)) {
           neighbors.push(this.map[currentNode.row + 1][currentNode.col])
         }
         if (currentNode.row - 1 >= 0) {
@@ -249,9 +249,6 @@ export class AStarComponent implements OnInit {
         neighbors.forEach(n => {
           if (n.nodeType == ASNodeType.wall || n.nodeType == ASNodeType.visited) { //this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row
             return;
-          // } else if (n.nodeType == ASNodeType.visited) {
-          //   currentNode.parent = currentNode.parent?.distance! > n.distance! ? currentNode.parent : n;
-          //   return;
           }
 
           let toOriginCost = currentNode.originCost + this.getDist(n.row, n.col, currentNode.row, currentNode.col);
