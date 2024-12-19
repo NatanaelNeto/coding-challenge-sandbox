@@ -9,22 +9,28 @@
   </div>
   <div class="section-container">
     <div class="grid-system">
-      <div class="gs-4 input-group">
+      <div class="gs-6 input-group">
         <label for="">Size of pixels (px)</label>
-        <input [disabled]="onIteration || isItOnEdit()" type="number" min="1" [(ngModel)]="cellSize" (change)="resetArray(); drawGrid()">
+        <input [disabled]="onIteration || onEdit" type="number" min="1" [(ngModel)]="cellSize" (change)="drawGrid()">
+      </div>
+      <div class="gs-6 input-group">
+        <label for="">Size of square</label>
+        <input [disabled]="onIteration || onEdit" type="number" min="1" [(ngModel)]="squareSize" (change)="resetArray(); drawGrid()">
       </div>
       <div class="gs-4 input-group">
-        <label for="">Size of square</label>
-        <input [disabled]="onIteration || isItOnEdit()" type="number" min="1" [(ngModel)]="squareSize" (change)="resetArray(); drawGrid()">
-      </div>
-      <div class="gs-4 input-group">
-        <label for="">Size of square</label>
-        <select [disabled]="onIteration || isItOnEdit()" [(ngModel)]="edit">
+        <label for="">Select Edit Mode</label>
+        <select [disabled]="onIteration || onEdit" (change)="onEdit = true" [(ngModel)]="edit">
           <option value="-1">Select edit mode</option>
           <option value="0">Set target</option>
           <option value="1">Set origin</option>
           <option value="2">Set wall</option>
         </select>
+      </div>
+      <div class="gs-4 input-group">
+        <button [disabled]="edit == -1" (click)="toggleEdit()">{{ edit >= 0 && onEdit ? 'EDITING' : 'Edit'}}</button>
+      </div>
+      <div class="gs-4 input-group">
+        <button [disabled]="onEdit" (click)="toggleIteration()">{{ onIteration ? 'STOP' : 'START'}}</button>
       </div>
     </div>
     <div class="canvas" [style]="'--padding: {{arraySpacing }}px'">

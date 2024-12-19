@@ -221,6 +221,12 @@ h4 {
     color: var(--text_color);
     padding: 10px;
     background-color: var(--background_color);
+    font-family: 'Roboto Mono', 'Roboto', sans-serif;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
   }
 
   button {
@@ -243,6 +249,11 @@ h4 {
         background-color: var(--text_color);
         color: var(--background_color);
       }
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
     }
   }
 }

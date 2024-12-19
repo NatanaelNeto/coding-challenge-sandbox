@@ -18,17 +18,18 @@ export class AStarComponent implements OnInit {
 
   toAddOrigin: boolean = false;
   toAddTarget: boolean = false;
-  toAddWalls:  boolean = false;
+  toAddWalls: boolean = false;
 
   map: ASNode[][] = [];
 
   visited: ASNode[] = [];
   toOpen: ASNode[] = [];
 
-  currGrid: boolean[][] = [];
-  nextGrid: boolean[][] = [];
+  track: ASNode[] = [];
 
   edit: number = -1;
+
+  onEdit: boolean = false;
 
   originLocation = { row: -1, col: -1 }
   targetLocation = { row: -1, col: -1 }
@@ -50,19 +51,16 @@ export class AStarComponent implements OnInit {
   }
 
   resetArray() {
-    this.map = Array.from({ length: this.squareSize }, () => Array(this.squareSize).fill({
-      parent: null,
-      distance: null,
-      isPath: true,
-      isVisited: false,
-      isOrigin: false,
-      isTarget: false,
-      targetCost: -1,
-      originCost: -1,
-    }));
+    this.map = Array.from({ length: this.squareSize }, () => Array.from({ length: this.squareSize}, () => new ASNode()));
 
-    for(let row = 0; row < this.squareSize; row += 1) {
+    for (let row = 0; row < this.squareSize; row += 1) {
       for (let col = 0; col < this.squareSize; col += 1) {
+        this.map[row][col].parent = null;
+        this.map[row][col].distance = null;
+        this.map[row][col].nodeType = ASNodeType.path;
+
+        this.map[row][col].targetCost = -1;
+        this.map[row][col].originCost = -1;
         this.map[row][col].row = row;
         this.map[row][col].col = col;
       }
@@ -87,14 +85,14 @@ export class AStarComponent implements OnInit {
         const y = row * (this.cellSize + this.arraySpacing);
 
         // Desenhar cada quadrado
-        this.ctx.fillStyle = ASNodeTypeMap.get(this.map[row][col].nodeType) || '#e0e3e6';
+        this.ctx.fillStyle = ASNodeTypeMap.get(this.map[row][col].nodeType)!;
         this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
       }
     }
   }
 
   private onCanvasClick(event: MouseEvent): void {
-    if(!this.isItOnEdit()) {
+    if (!this.onEdit) {
       return
     }
 
@@ -112,15 +110,37 @@ export class AStarComponent implements OnInit {
 
 
     if (row >= 0 && row < this.squareSize && col >= 0 && col < this.squareSize) {
+      if(this.edit == 0) {
 
-      this.currGrid[row][col] = !this.currGrid[row][col];
-      this.drawGrid();
+        if(this.targetLocation.row >= 0 && this.targetLocation.col >= 0) {
+          this.map[this.targetLocation.row][this.targetLocation.col].nodeType = ASNodeType.path;
+        }
+        this.targetLocation.row = row;
+        this.targetLocation.col = col;
+        this.map[row][col].nodeType = ASNodeType.target;
+      }
+      else if(this.edit == 1) {
+        if(this.originLocation.row >= 0 && this.originLocation.col >= 0) {
+          this.map[this.originLocation.row][this.originLocation.col].nodeType = ASNodeType.path;
+        }
+        this.originLocation.row = row;
+        this.originLocation.col = col;
+        this.map[row][col].nodeType = ASNodeType.origin;
+      }
+      else if (this.edit == 2 && this.map[row][col].nodeType != ASNodeType.origin && this.map[row][col].nodeType != ASNodeType.target) {
+        this.map[row][col].nodeType = this.map[row][col].nodeType == ASNodeType.wall ? ASNodeType.path : ASNodeType.wall;
+      }
     }
+    this.drawGrid();
+  }
+
+  toggleEdit() {
+    this.onEdit = !this.onEdit;
   }
 
   toggleIteration() {
     this.onIteration = !this.onIteration;
-
+    
     if (this.onIteration) {
       if (this.toOpen.length == 0) {
         let origin: ASNode = new ASNode();
@@ -132,75 +152,99 @@ export class AStarComponent implements OnInit {
             }
           })
         });
-
+        
         origin.parent = origin;
         origin.originCost = 0;
         origin.targetCost = this.getDist(origin.row, origin.col, this.targetLocation.row, this.targetLocation.col);
-
+        
         this.toOpen.push(origin);
+        this.track = [];
+        this.visited = [];
       }
-
+      console.log('Target Node:', this.map[this.targetLocation.row][this.targetLocation.col]);
+      console.log('Origin Node:', this.map[this.originLocation.row][this.originLocation.col]);
       this.interval = window.setInterval(this.getNextGen.bind(this), this.genDur);
     }
-
+    
     else if (this.interval) {
       clearInterval(this.interval);
       this.interval = undefined;
     }
   }
-
+  iteration = 1;
   getNextGen() {
-    if (this.toOpen.length > 0) {
+    console.log('INICIOU');
+    console.log(this.toOpen);
+    if (this.toOpen.length > 0 && this.onIteration) {
       // DO A*
       const currentNode = this.toOpen.shift();
       const neighbors = [];
-
-      if(currentNode) {
-        if(currentNode.nodeType != ASNodeType.origin && currentNode.nodeType != ASNodeType.target) {
+      
+      if (currentNode) {
+        console.log('CAPTOU CURRENTNODE');
+        if (currentNode.nodeType != ASNodeType.origin && currentNode.nodeType != ASNodeType.target) {
           currentNode.nodeType = ASNodeType.visited;
+          this.map[currentNode.row][currentNode.col].nodeType = ASNodeType.visited;
+          console.log('SETOU CURRENTNODE');
         }
         this.visited.push(currentNode);
 
-        if(currentNode.nodeType == ASNodeType.target) {
-          // END A*
+        console.log(`Iteration #${this.iteration}: Current Node: ${currentNode}`);
+        this.iteration += 1;
+        
+        if (currentNode.nodeType == ASNodeType.target) {
+          console.log('FINALIZOU')
+          console.log(this.map);
           this.toOpen = [];
           clearInterval(this.interval);
           this.interval = undefined;
+          this.onIteration = false;
+
+          let currNode = currentNode;
+          while(currNode !== currNode.parent!) {
+            this.map[currNode.row][currNode.col].nodeType = ASNodeType.pathline;
+            currentNode.nodeType = ASNodeType.pathline;
+            this.track.push(currNode);
+            currNode = currNode.parent!;
+          }
+          console.log(this.map);
+          this.drawGrid();
         }
 
-        if(currentNode.col - 1 >= 0) {
-          if(currentNode.row - 1 >= 0) {
+        if (currentNode.col - 1 >= 0) {
+          if (currentNode.row - 1 >= 0) {
             neighbors.push(this.map[currentNode.row - 1][currentNode.col - 1]);
           }
-          if(currentNode.row + 1 < this.squareSize) {
+          if (currentNode.row + 1 < this.squareSize) {
             neighbors.push(this.map[currentNode.row + 1][currentNode.col - 1]);
           }
           neighbors.push(this.map[currentNode.row][currentNode.col - 1]);
         }
 
-        if(currentNode.col + 1 < this.squareSize) {
-          if(currentNode.row - 1 >= 0) {
+        if (currentNode.col + 1 < this.squareSize) {
+          if (currentNode.row - 1 >= 0) {
             neighbors.push(this.map[currentNode.row - 1][currentNode.col + 1]);
           }
-          if(currentNode.row + 1 < this.squareSize) {
+          if (currentNode.row + 1 < this.squareSize) {
             neighbors.push(this.map[currentNode.row + 1][currentNode.col + 1]);
           }
           neighbors.push(this.map[currentNode.row][currentNode.col + 1]);
         }
 
-        if(currentNode.row + 1 < this.squareSize) {
-          neighbors.push(this.map[currentNode.row + 1][currentNode.col]) 
+        if (currentNode.row + 1 < this.squareSize) {
+          neighbors.push(this.map[currentNode.row + 1][currentNode.col])
         }
-        if(currentNode.row - 1 >= 0) {
-          neighbors.push(this.map[currentNode.row - 1][currentNode.col]) 
+        if (currentNode.row - 1 >= 0) {
+          neighbors.push(this.map[currentNode.row - 1][currentNode.col])
         }
 
         neighbors.forEach(n => {
-          if(n.nodeType == ASNodeType.wall || n.nodeType == ASNodeType.visited || this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row)) return;
+          if (n.nodeType == ASNodeType.wall || n.nodeType == ASNodeType.visited || this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row)) return;
           n.parent = currentNode;
           n.originCost = n.parent.originCost + this.getDist(n.row, n.col, n.parent.row, n.parent.col);
           n.targetCost = this.getDist(n.row, n.col, this.targetLocation.row, this.targetLocation.col);
           n.distance = n.originCost + n.targetCost;
+          this.toOpen.push(n);
         });
 
         this.toOpen.sort((a, b) => a.distance! - b.distance!);
@@ -209,20 +253,19 @@ export class AStarComponent implements OnInit {
 
     else {
       // EXIT PROGRAM
+      console.log('FORÇOU FINALIZAÇÃO')
       this.toOpen = [];
       clearInterval(this.interval);
       this.interval = undefined;
+      this.onIteration = false;
     }
 
     this.drawGrid();
   }
 
   getDist(sx: number, sy: number, tx: number, ty: number) {
-    const dist = (tx - sx)^2 + (ty - sy)^2;
-    return Math.sqrt(dist);
-  }
-
-  isItOnEdit() {
-    return this.toAddOrigin || this.toAddTarget || this.toAddWalls;
+    const a = (tx - sx);
+    const b = (ty - sy);
+    return Math.sqrt(a*a + b*b);
   }
 }
