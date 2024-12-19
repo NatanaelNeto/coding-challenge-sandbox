@@ -27,5 +27,5 @@ export const ASNodeTypeMap = new Map<ASNodeType, string>([
   [ASNodeType.origin, '#83f436'],
   [ASNodeType.target, '#f44336'],
   [ASNodeType.visited, '#a5a7aa'],
-  [ASNodeType.pathline, '#c2dcb1'],
+  [ASNodeType.pathline, '#3643f4'],
 ]);

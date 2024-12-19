@@ -161,8 +161,6 @@ export class AStarComponent implements OnInit {
         this.track = [];
         this.visited = [];
       }
-      console.log('Target Node:', this.map[this.targetLocation.row][this.targetLocation.col]);
-      console.log('Origin Node:', this.map[this.originLocation.row][this.originLocation.col]);
       this.interval = window.setInterval(this.getNextGen.bind(this), this.genDur);
     }
     
@@ -173,42 +171,43 @@ export class AStarComponent implements OnInit {
   }
   iteration = 1;
   getNextGen() {
-    console.log('INICIOU');
-    console.log(this.toOpen);
     if (this.toOpen.length > 0 && this.onIteration) {
       // DO A*
       const currentNode = this.toOpen.shift();
       const neighbors = [];
       
       if (currentNode) {
-        console.log('CAPTOU CURRENTNODE');
+
         if (currentNode.nodeType != ASNodeType.origin && currentNode.nodeType != ASNodeType.target) {
           currentNode.nodeType = ASNodeType.visited;
           this.map[currentNode.row][currentNode.col].nodeType = ASNodeType.visited;
-          console.log('SETOU CURRENTNODE');
         }
         this.visited.push(currentNode);
 
-        console.log(`Iteration #${this.iteration}: Current Node: ${currentNode}`);
         this.iteration += 1;
         
         if (currentNode.nodeType == ASNodeType.target) {
-          console.log('FINALIZOU')
-          console.log(this.map);
           this.toOpen = [];
           clearInterval(this.interval);
           this.interval = undefined;
-          this.onIteration = false;
 
           let currNode = currentNode;
-          while(currNode !== currNode.parent!) {
-            this.map[currNode.row][currNode.col].nodeType = ASNodeType.pathline;
-            currentNode.nodeType = ASNodeType.pathline;
+
+          this.interval = window.setInterval(() => {
+            if (currNode.nodeType == ASNodeType.origin) {
+              clearInterval(this.interval);
+              this.interval = undefined;
+              this.onIteration = false;
+              return;
+            }
+            if(currNode.nodeType != ASNodeType.target) {
+              this.map[currNode.row][currNode.col].nodeType = ASNodeType.pathline;
+              currNode.nodeType = ASNodeType.pathline;
+            }
             this.track.push(currNode);
             currNode = currNode.parent!;
-          }
-          console.log(this.map);
-          this.drawGrid();
+            this.drawGrid();
+          }, this.genDur);
         }
 
         if (currentNode.col - 1 >= 0) {
@@ -239,7 +238,12 @@ export class AStarComponent implements OnInit {
         }
 
         neighbors.forEach(n => {
-          if (n.nodeType == ASNodeType.wall || n.nodeType == ASNodeType.visited || this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row)) return;
+          if (n.nodeType == ASNodeType.wall || this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row)) {
+            return;
+          } else if (n.nodeType == ASNodeType.visited) {
+            currentNode.parent = currentNode.parent?.distance! > n.distance! ? currentNode.parent : n;
+            return;
+          }
           n.parent = currentNode;
           n.originCost = n.parent.originCost + this.getDist(n.row, n.col, n.parent.row, n.parent.col);
           n.targetCost = this.getDist(n.row, n.col, this.targetLocation.row, this.targetLocation.col);
@@ -247,13 +251,12 @@ export class AStarComponent implements OnInit {
           this.toOpen.push(n);
         });
 
-        this.toOpen.sort((a, b) => a.distance! - b.distance!);
+        this.toOpen.sort((a, b) => a.targetCost! - b.targetCost!);
       }
     }
 
     else {
       // EXIT PROGRAM
-      console.log('FORÇOU FINALIZAÇÃO')
       this.toOpen = [];
       clearInterval(this.interval);
       this.interval = undefined;
