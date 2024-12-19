@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild, type OnInit } from '@angular/core';
-import { ASNode } from 'src/app/shared/models/a-star-view-model';
+import { ASNode, ASNodeType, ASNodeTypeMap } from 'src/app/shared/models/a-star-view-model';
 
 @Component({
   selector: 'app-a-star',
@@ -16,9 +16,6 @@ export class AStarComponent implements OnInit {
   onIteration = false;
   interval: number | undefined;
 
-  black = "#3a3c3f";
-  white = "#e0e3e6";
-
   toAddOrigin: boolean = false;
   toAddTarget: boolean = false;
   toAddWalls:  boolean = false;
@@ -30,6 +27,11 @@ export class AStarComponent implements OnInit {
 
   currGrid: boolean[][] = [];
   nextGrid: boolean[][] = [];
+
+  edit: number = -1;
+
+  originLocation = { row: -1, col: -1 }
+  targetLocation = { row: -1, col: -1 }
 
   @ViewChild('myCanvas', { static: false }) canvas!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
@@ -58,6 +60,13 @@ export class AStarComponent implements OnInit {
       targetCost: -1,
       originCost: -1,
     }));
+
+    for(let row = 0; row < this.squareSize; row += 1) {
+      for (let col = 0; col < this.squareSize; col += 1) {
+        this.map[row][col].row = row;
+        this.map[row][col].col = col;
+      }
+    }
   }
 
 
@@ -78,7 +87,7 @@ export class AStarComponent implements OnInit {
         const y = row * (this.cellSize + this.arraySpacing);
 
         // Desenhar cada quadrado
-        this.ctx.fillStyle = this.map[row][col].isPath ? this.white : this.black;
+        this.ctx.fillStyle = ASNodeTypeMap.get(this.map[row][col].nodeType) || '#e0e3e6';
         this.ctx.fillRect(x, y, this.cellSize, this.cellSize);
       }
     }
@@ -113,6 +122,24 @@ export class AStarComponent implements OnInit {
     this.onIteration = !this.onIteration;
 
     if (this.onIteration) {
+      if (this.toOpen.length == 0) {
+        let origin: ASNode = new ASNode();
+
+        this.map.forEach(row => {
+          row.forEach(node => {
+            if (node.nodeType == ASNodeType.origin) {
+              origin = node;
+            }
+          })
+        });
+
+        origin.parent = origin;
+        origin.originCost = 0;
+        origin.targetCost = this.getDist(origin.row, origin.col, this.targetLocation.row, this.targetLocation.col);
+
+        this.toOpen.push(origin);
+      }
+
       this.interval = window.setInterval(this.getNextGen.bind(this), this.genDur);
     }
 
@@ -123,65 +150,76 @@ export class AStarComponent implements OnInit {
   }
 
   getNextGen() {
-    for (let row = 0; row < this.squareSize; row += 1) {
-      for (let col = 0; col < this.squareSize; col += 1) {
-        this.nextGrid[row][col] = this.checkIsAlive(row, col, this.currGrid[row][col]);
+    if (this.toOpen.length > 0) {
+      // DO A*
+      const currentNode = this.toOpen.shift();
+      const neighbors = [];
+
+      if(currentNode) {
+        if(currentNode.nodeType != ASNodeType.origin && currentNode.nodeType != ASNodeType.target) {
+          currentNode.nodeType = ASNodeType.visited;
+        }
+        this.visited.push(currentNode);
+
+        if(currentNode.nodeType == ASNodeType.target) {
+          // END A*
+          this.toOpen = [];
+          clearInterval(this.interval);
+          this.interval = undefined;
+        }
+
+        if(currentNode.col - 1 >= 0) {
+          if(currentNode.row - 1 >= 0) {
+            neighbors.push(this.map[currentNode.row - 1][currentNode.col - 1]);
+          }
+          if(currentNode.row + 1 < this.squareSize) {
+            neighbors.push(this.map[currentNode.row + 1][currentNode.col - 1]);
+          }
+          neighbors.push(this.map[currentNode.row][currentNode.col - 1]);
+        }
+
+        if(currentNode.col + 1 < this.squareSize) {
+          if(currentNode.row - 1 >= 0) {
+            neighbors.push(this.map[currentNode.row - 1][currentNode.col + 1]);
+          }
+          if(currentNode.row + 1 < this.squareSize) {
+            neighbors.push(this.map[currentNode.row + 1][currentNode.col + 1]);
+          }
+          neighbors.push(this.map[currentNode.row][currentNode.col + 1]);
+        }
+
+        if(currentNode.row + 1 < this.squareSize) {
+          neighbors.push(this.map[currentNode.row + 1][currentNode.col]) 
+        }
+        if(currentNode.row - 1 >= 0) {
+          neighbors.push(this.map[currentNode.row - 1][currentNode.col]) 
+        }
+
+        neighbors.forEach(n => {
+          if(n.nodeType == ASNodeType.wall || n.nodeType == ASNodeType.visited || this.toOpen.some(toOpenNode => toOpenNode.col == n.col && toOpenNode.row == n.row)) return;
+          n.parent = currentNode;
+          n.originCost = n.parent.originCost + this.getDist(n.row, n.col, n.parent.row, n.parent.col);
+          n.targetCost = this.getDist(n.row, n.col, this.targetLocation.row, this.targetLocation.col);
+          n.distance = n.originCost + n.targetCost;
+        });
+
+        this.toOpen.sort((a, b) => a.distance! - b.distance!);
       }
     }
 
-    this.currGrid = this.nextGrid.map(row => [...row]);
+    else {
+      // EXIT PROGRAM
+      this.toOpen = [];
+      clearInterval(this.interval);
+      this.interval = undefined;
+    }
+
     this.drawGrid();
   }
 
-  checkIsAlive(row: number, col: number, currState: boolean): boolean {
-    const topRow = row - 1;
-    const downRow = row + 1;
-    const leftCol = col - 1;
-    const rightCol = col + 1;
-
-    const neighbors: boolean[] = []
-
-    // VERIFY TOP NEIGHBORS
-    if (topRow >= 0) {
-      neighbors.push(this.currGrid[topRow][col]);
-
-      if (leftCol >= 0) {
-        neighbors.push(this.currGrid[topRow][leftCol]);
-      }
-
-      if (rightCol < this.squareSize) {
-        neighbors.push(this.currGrid[topRow][rightCol]);
-      }
-    }
-
-
-    // VERIFY LEFT NEIGHBOR
-    if (leftCol >= 0) {
-      neighbors.push(this.currGrid[row][leftCol]);
-    }
-
-
-    // VERIFY DOWN NEIGHBORS
-    if (downRow < this.squareSize) {
-      neighbors.push(this.currGrid[downRow][col]);
-
-      if (leftCol >= 0) {
-        neighbors.push(this.currGrid[downRow][leftCol]);
-      }
-
-      if (rightCol < this.squareSize) {
-        neighbors.push(this.currGrid[downRow][rightCol]);
-      }
-    }
-
-    // VERIFY RIGHT NEIGHBOR
-    if (rightCol < this.squareSize) {
-      neighbors.push(this.currGrid[row][rightCol]);
-    }
-
-    const count = neighbors.reduce((c, v) => c + (v ? 1 : 0), 0);
-
-    return (count < 2 || count > 3) ? false : count == 3 ? true : currState;
+  getDist(sx: number, sy: number, tx: number, ty: number) {
+    const dist = (tx - sx)^2 + (ty - sy)^2;
+    return Math.sqrt(dist);
   }
 
   isItOnEdit() {

@@ -17,6 +17,15 @@
         <label for="">Size of square</label>
         <input [disabled]="onIteration || isItOnEdit()" type="number" min="1" [(ngModel)]="squareSize" (change)="resetArray(); drawGrid()">
       </div>
+      <div class="gs-4 input-group">
+        <label for="">Size of square</label>
+        <select [disabled]="onIteration || isItOnEdit()" [(ngModel)]="edit">
+          <option value="-1">Select edit mode</option>
+          <option value="0">Set target</option>
+          <option value="1">Set origin</option>
+          <option value="2">Set wall</option>
+        </select>
+      </div>
     </div>
     <div class="canvas" [style]="'--padding: {{arraySpacing }}px'">
       <canvas #myCanvas></canvas>
