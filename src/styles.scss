@@ -48,6 +48,16 @@ h4 {
   font-weight: bold;
 }
 
+.italic {
+  font-style: italic;
+}
+
+a {
+  color: var(--text_color);
+  text-decoration: underline;
+  font-weight: bold;
+}
+
 // HEADER
 
 .header {
@@ -135,6 +145,29 @@ h4 {
   &-content {
     p {
       margin-bottom: 10px;
+    }
+
+    &-img {
+      display: flex;
+      gap: 10px;
+      
+      &-holder {
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        gap: 10px;
+        min-width: 400px;
+
+        img {
+          border: 2px solid var(--text_color);
+        }
+
+        &-legend {
+          font-size: 12px;
+          text-align: center;
+          max-width: 450px;
+        }
+      }
     }
   }
 }

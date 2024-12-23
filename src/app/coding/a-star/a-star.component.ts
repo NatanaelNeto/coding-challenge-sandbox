@@ -233,7 +233,7 @@ export class AStarComponent implements OnInit {
           if (currentNode.row - 1 >= 0 && !(this.map[currentNode.row][currentNode.col + 1].nodeType == ASNodeType.wall && this.map[currentNode.row - 1][currentNode.col].nodeType == ASNodeType.wall)) {
             neighbors.push(this.map[currentNode.row - 1][currentNode.col + 1]);
           }
-          if (currentNode.row + 1 < this.squareSize) {
+          if (currentNode.row + 1 < this.squareSize && !(this.map[currentNode.row][currentNode.col + 1].nodeType == ASNodeType.wall && this.map[currentNode.row + 1][currentNode.col].nodeType == ASNodeType.wall)) {
             neighbors.push(this.map[currentNode.row + 1][currentNode.col + 1]);
           }
           neighbors.push(this.map[currentNode.row][currentNode.col + 1]);

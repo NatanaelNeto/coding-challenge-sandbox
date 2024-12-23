@@ -4,15 +4,17 @@
       <h2>A* Algorithm</h2>
     </div>
     <div class="section-content">
-      <p>This was the most fun project i've done so far. A few years ago, I've done a similar project for my Computer Science college (it's available <a href="">here</a>). It is the classic A* algorithm, with Euclidean's distance as a heuristic.</p>
-      <p>I had some difficulties here. First of all, how <span class="s-italic">exactly</span> A* algorithm works? I knew the theory, I've done this project before, but I didn't want to go back to my Github and just copy the codes and drop here. I needed to do it from zero.</p>
-      <p>I searched some videos in YouTube to visualize A* algorithm and reproduze it with TypeScript. Initially, the algorithm that I made works almost perfectly, but I didn't handle some edge cases (like diagonal paths) and my first attempt took a long time to deliver a result.</p>
+      <p>This was the most fun project I've done so far. It uses the classic A* algorithm, with Euclidean distance as a heuristic. I love the way this algorithm works. A few years ago, I did a similar project for my Computer Science course (it is available <a href="https://natanaelneto.github.io/catmaze/" target="_blank">here</a>), but it had some errors. So, I decided to fix it.</p>
+      <p>I had some difficulties here. First of all, how <span class="italic">exactly</span> does the A* algorithm work? I knew the theory and had done this project before, but I didn't want to go back to my GitHub and just copy the code and paste it here. I needed to do it from scratch.</p>
+      <p>I searched for some videos on YouTube to visualize the A* algorithm and reproduce it with TypeScript. Initially, the algorithm I made worked almost perfectly, but I didn't handle some edge cases (like diagonal paths), and my first attempt took a long time to deliver a result.</p>
       <div class="section-content-img">
         <div class="section-content-img-holder">
           <img src="assets/imgs/a-star-01.png" alt="">
+          <p class="section-content-img-holder-legend">Expected Behavior | Unexpected Behavior (edge case) | Okay, Houston, we've had a problem here</p>
         </div>
-        <p>First things first, I </p>
+        <p>First things first, I adjusted the algorithm to consider diagonal paths. However, when it reached a 'chessboard' point (as seen in the figure), it just crossed the walls, which is not acceptable. To fix this, I coded it to check the vertical/horizontal adjacent neighbors. If both are walls, the current neighbor is marked as unreachable.</p>
       </div>
+      
     </div>
   </div>
   <div class="section-container">
